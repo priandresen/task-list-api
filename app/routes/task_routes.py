@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, make_response, Response
+from flask import Blueprint, Response, request, abort, make_response
 from app.models.task import Task
 from ..db import db
 
@@ -20,7 +20,7 @@ def create_task():
         "id": new_task.id,
         "title": new_task.title,
         "description": new_task.description,
-        "completed_at": False if new_task.completed_at is None else new_task.completed_at
+        "is_complete": False if new_task.completed_at is None else new_task.completed_at
     }
 
     return response, 201
@@ -76,4 +76,17 @@ def validate_task(task_id):
 
     return task
 
+@tasks_bp.put("/<task_id>")
+def replace_task(task_id):
+    task = validate_task(task_id)
+
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+    task.completed_at = request_body["is_complete"] if "is_complete" in request_body else None
+
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
 
