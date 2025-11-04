@@ -1,6 +1,6 @@
-from flask import Blueprint, Response, request, abort, make_response
+from flask import Blueprint, Response, request
 from app.models.task import Task
-from app.routes.route_utilities import validate_model
+from app.routes.route_utilities import validate_model, create_model, get_models_with_filters
 from ..db import db
 
 bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
@@ -9,37 +9,16 @@ bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 def create_task():
     request_body = request.get_json()
     
-    try:
-        new_task = Task.from_dict(request_body)
-    except KeyError:
-        response = {"details": "Invalid data"}
-        abort(make_response(response, 400))
-
-    db.session.add(new_task)
-    db.session.commit()
-
-    return new_task.to_dict(), 201
+    return create_model(Task, request_body)
 
 @bp.get("")
 def get_all_tasks():
-
-    query = db.select(Task)
-
-    #if query params, filter by those params
-
-    query = query.order_by(Task.id)
-
-    tasks = db.session.scalars(query.order_by(Task.id))
-
-    task_response = [task.to_dict() for task in tasks]
-
-    return task_response
+    return get_models_with_filters(Task, request.args)
 
 @bp.get("/<task_id>")
 def get_one_task(task_id):
+    
     task = validate_model(Task,task_id)
-
-
     return task.to_dict()
 
 @bp.put("/<task_id>")
