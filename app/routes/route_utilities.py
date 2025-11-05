@@ -43,7 +43,6 @@ def get_models_with_filters(cls, filters=None):
             if hasattr(cls, attribute):
                 query = query.where(getattr(cls, attribute).ilike(f"%{value}%"))
     
-
     if filters and filters.get("sort") == "asc":
         query = query.order_by(cls.title.asc())
     if filters and filters.get("sort") == "desc":

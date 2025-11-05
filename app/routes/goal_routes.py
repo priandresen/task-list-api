@@ -1,9 +1,8 @@
 from flask import Blueprint, Response, request
-from app.models import task
 from app.models.goal import Goal
-from app.routes.route_utilities import validate_model, create_model, get_models_with_filters, make_slack_post
+from app.routes.route_utilities import validate_model, create_model, get_models_with_filters
 from ..db import db
-from datetime import datetime
+
 
 bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
@@ -23,12 +22,44 @@ def get_one_goal(goal_id):
     goal = validate_model(Goal,goal_id)
     return goal.to_dict()
 
+
+
+
+@bp.get("/<goal_id>/tasks")
+def get_tasks_for_goal(goal_id):
+    goal = validate_model(Goal, goal_id)
+    tasks = [task.to_dict() for task in goal.tasks]
+    return {
+        "id": goal.id,
+        "title": goal.title,
+        "tasks": tasks
+    }
+
+@bp.post("/<goal_id>/tasks")
+def post_tasks_to_goal(goal_id):
+    goal = validate_model(Goal, goal_id)
+    request_body = request.get_json()
+    task_ids = request_body.get("task_ids", [])
+    tasks = []
+    for task_id in task_ids:
+        task = validate_model(Task, task_id)
+        tasks.append(task)
+    goal.tasks = tasks
+    db.session.commit()
+    return {
+        "id": goal.id,
+        "task_ids": [task.id for task in tasks]
+    }
+
+
+
+
+
+
 @bp.put("/<goal_id>")
 def replace_goal(goal_id):
     goal = validate_model(Goal,goal_id)
-
     request_body = request.get_json()
-
     goal.title = request_body["title"]
 
     db.session.commit()
