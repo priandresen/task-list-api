@@ -1,3 +1,4 @@
+from asyncio import Task
 from flask import Blueprint, Response, request
 from app.models.goal import Goal
 from app.routes.route_utilities import validate_model, create_model, get_models_with_filters
@@ -12,6 +13,24 @@ def create_goal():
     
     return create_model(Goal, request_body)
 
+@bp.post("/<goal_id>/tasks")
+def create_goal_associated_with_tasks(goal_id):
+    goal = validate_model(Goal, goal_id)
+    request_body = request.get_json()
+
+    for task_id in request_body["task_ids"]:
+        task = validate_model(Task, task_id)
+        task.goal_id = goal.id
+        goal.tasks.append(task.to_dict())
+        db.session.commit()
+
+    db.session.commit()
+
+    return {
+        "id": goal.id,
+        "task_ids": goal.tasks
+    }
+
 @bp.get("")
 def get_all_goals():
     return get_models_with_filters(Goal, request.args)
@@ -24,9 +43,8 @@ def get_one_goal(goal_id):
 
 
 
-
 @bp.get("/<goal_id>/tasks")
-def get_tasks_for_goal(goal_id):
+def get_tasks_associated_with_a_goal(goal_id):
     goal = validate_model(Goal, goal_id)
     tasks = [task.to_dict() for task in goal.tasks]
     return {
@@ -34,25 +52,6 @@ def get_tasks_for_goal(goal_id):
         "title": goal.title,
         "tasks": tasks
     }
-
-@bp.post("/<goal_id>/tasks")
-def post_tasks_to_goal(goal_id):
-    goal = validate_model(Goal, goal_id)
-    request_body = request.get_json()
-    task_ids = request_body.get("task_ids", [])
-    tasks = []
-    for task_id in task_ids:
-        task = validate_model(Task, task_id)
-        tasks.append(task)
-    goal.tasks = tasks
-    db.session.commit()
-    return {
-        "id": goal.id,
-        "task_ids": [task.id for task in tasks]
-    }
-
-
-
 
 
 
@@ -74,24 +73,5 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return Response(status=204, mimetype="application/json")
-
-# @bp.patch("/<goal_id>/mark_complete")
-# def patch_goal(goal_id):
-#     task = validate_model(Task, task_id)
-#     task.completed_at = datetime.now()
-#     make_slack_post(Task, task_id)
-
-#     db.session.commit()
-#     return Response(status=204, mimetype="application/json")
-
-# @bp.patch("/<task_id>/mark_incomplete")
-# def patch_incomplete_task(task_id):
-#     task = validate_model(Task, task_id)
-#     task.completed_at = None
-
-#     db.session.commit()
-#     return Response(status=204, mimetype="application/json")
-
-
 
 
