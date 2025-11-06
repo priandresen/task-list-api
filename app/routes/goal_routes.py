@@ -1,6 +1,7 @@
 from asyncio import Task
 from flask import Blueprint, Response, request
 from app.models.goal import Goal
+from app.models.task import Task
 from app.routes.route_utilities import validate_model, create_model, get_models_with_filters
 from ..db import db
 
@@ -17,17 +18,21 @@ def create_goal():
 def create_goal_associated_with_tasks(goal_id):
     goal = validate_model(Goal, goal_id)
     request_body = request.get_json()
-
-    # for task_id in request_body["task_ids"]:
-    #     task = validate_model(Task, task_id)
-    #     goal.tasks.append(task)
-    #     task.goal_id = goal.id
-
-    # db.session.commit()
     
-    goal_response = get_tasks_associated_with_a_goal(goal.id)
+    if goal.tasks:
+        for task in goal.tasks:
+            task.goal_id = None
+        goal.tasks.clear()
 
-    return goal_response
+    for task_id in request_body.get("task_ids", []):
+        task = validate_model(Task, task_id)
+        task.goal_id = goal.id
+        goal.tasks.append(task)
+        
+    db.session.commit()
+
+    return {"id" : goal.id, 
+            "task_ids": [task.id for task in goal.tasks]}
 
 
 @bp.get("")
