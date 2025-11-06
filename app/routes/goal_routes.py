@@ -17,26 +17,18 @@ def create_goal():
 def create_goal_associated_with_tasks(goal_id):
     goal = validate_model(Goal, goal_id)
     request_body = request.get_json()
-    tasks_id = request_body.get("task_ids", [])
-    tasks = []
-    for task_id in tasks_id:
-        task = validate_model(Task, task_id)
-        # tasks.append(task)
-        task.goal_id = goal.id
 
-    goal.tasks = tasks
+    # for task_id in request_body["task_ids"]:
+    #     task = validate_model(Task, task_id)
+    #     goal.tasks.append(task)
+    #     task.goal_id = goal.id
 
-    db.session.commit()
+    # db.session.commit()
     
-    goal_response = get_tasks_associated_with_a_goal(goal_id)
+    goal_response = get_tasks_associated_with_a_goal(goal.id)
 
     return goal_response
 
-    # return {
-    #     "id": goal.id,
-    #     "titl"
-    #     "task_ids": goal.tasks
-    # }
 
 @bp.get("")
 def get_all_goals():
