@@ -1,8 +1,10 @@
 import os
-from flask import abort, make_response
+from flask import abort, json, make_response
 import requests
 from ..db import db
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def validate_model(cls, model_id):
     try:
@@ -53,24 +55,26 @@ def get_models_with_filters(cls, filters=None):
 
     return models_response
 
-
-
-
 def make_slack_post(cls, model_id):
+
+    model = validate_model(cls, model_id)
 
     url= "https://slack.com/api/chat.postMessage"
 
-    text = f"{cls.__name__} '{cls.title}' has been completed!"
+    text = f"{cls.__name__} '{model.title}' has been completed!"
     slack_token = os.environ.get("SLACK_TOKEN")
 
     headers = {
-        "Authorization": f"Bearer {slack_token}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": f"{slack_token}"
     }
-    data = {
-        "channel": "test-slack-api",
+    payload = json.dumps({
+        "channel": "C09N95RPR34",
         "text": text
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code != 200:
-        abort(make_response({"message": "Failed to send Slack message"}, 500))
+    })
+
+    url = "https://slack.com/api/chat.postMessage"
+
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    
