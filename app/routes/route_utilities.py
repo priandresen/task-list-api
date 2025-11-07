@@ -58,7 +58,7 @@ def make_slack_post(cls, model_id):
 
     task = validate_model(cls, model_id)
     text = f"{cls.__name__} '{task.title}' has been completed!"
-    slack_token = os.environ["SLACK_TOKEN"]
+    slack_token = os.environ.get("SLACK_TOKEN")
     client = WebClient(token=slack_token)
 
     try:
