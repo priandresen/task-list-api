@@ -1,9 +1,8 @@
 import os
 from flask import abort, make_response
+import requests
 from ..db import db
 import os
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
 
 def validate_model(cls, model_id):
     try:
@@ -54,17 +53,24 @@ def get_models_with_filters(cls, filters=None):
 
     return models_response
 
+
+
+
 def make_slack_post(cls, model_id):
 
-    task = validate_model(cls, model_id)
-    text = f"{cls.__name__} '{task.title}' has been completed!"
-    slack_token = os.environ.get("SLACK_TOKEN")
-    client = WebClient(token=slack_token)
+    url= "https://slack.com/api/chat.postMessage"
 
-    try:
-        client.chat_postMessage(
-            channel="test-slack-api",
-            text=text,
-        )
-    except SlackApiError as e:
-        assert e.response["error"]
+    text = f"{cls.__name__} '{cls.title}' has been completed!"
+    slack_token = os.environ.get("SLACK_TOKEN")
+
+    headers = {
+        "Authorization": f"Bearer {slack_token}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "channel": "test-slack-api",
+        "text": text
+    }
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code != 200:
+        abort(make_response({"message": "Failed to send Slack message"}, 500))
