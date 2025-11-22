@@ -22,7 +22,7 @@ class Task(db.Model):
             "id": self.id,
             "title": self.title,
             "description": self.description,
-            "is_complete": False if self.completed_at is None else self.completed_at
+            "is_complete": False if self.completed_at is None else True
         }
         if self.goal_id:
             task_dict["goal_id"] = self.goal_id
@@ -33,6 +33,6 @@ class Task(db.Model):
     def from_dict(cls, data):
         new_task = cls(title=data["title"],
                     description=data["description"],
-                    completed_at=data["is_complete"] if "is_complete" in data and data["is_complete"] != False else None
+                    completed_at=datetime.fromisoformat(data["completed_at"]) if "completed_at" in data and data["completed_at"] != False else None
                     )
         return new_task
