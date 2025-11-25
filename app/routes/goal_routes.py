@@ -1,4 +1,3 @@
-from asyncio import Task
 from flask import Blueprint, Response, request
 from app.models.goal import Goal
 from app.models.task import Task
