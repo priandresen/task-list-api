@@ -3,8 +3,6 @@ from flask import abort, json, make_response
 import requests
 from ..db import db
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
 def validate_model(cls, model_id):
     try:
