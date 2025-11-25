@@ -19,13 +19,10 @@ def associate_tasks_to_goal(goal_id):
     request_body = request.get_json()
     
     if goal.tasks:
-        for task in goal.tasks:
-            task.goal_id = None
         goal.tasks.clear()
 
     for task_id in request_body.get("task_ids", []):
         task = validate_model(Task, task_id)
-        task.goal_id = goal.id
         goal.tasks.append(task)
         
     db.session.commit()
