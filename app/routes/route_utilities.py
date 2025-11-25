@@ -47,7 +47,7 @@ def get_models_with_filters(cls, filters=None):
     if filters and filters.get("sort") == "desc":
         query = query.order_by(cls.title.desc())
 
-    models = db.session.scalars(query)
+    models = db.session.scalars(query.order_by(cls.id))
 
     models_response = [model.to_dict() for model in models]
 
