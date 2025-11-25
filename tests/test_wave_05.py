@@ -1,4 +1,5 @@
 from app.models.goal import Goal
+from app.db import db 
 import pytest
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
@@ -116,7 +117,7 @@ def test_get_goal_not_found(client):
     # Assert
     # ---- Complete Test ----
     assert response.status_code == 404
-    assert "Goal 1 not found" in response_body["message"]
+    assert response_body == {"message" : "Goal 1 not found"}
     # ---- Complete Test ----
 
 
@@ -143,10 +144,13 @@ def test_update_goal(client, one_goal):
     response = client.put("/goals/1", json={"title": "Build a doll house"})
     # ---- Complete Act Here ----
 
+    query = db.select(Goal).where(Goal.id ==1)
+    new_goal = db.session.scalar(query)
     # Assert
     # ---- Complete Assertions Here ----
     assert response.status_code == 204
-    assert Goal.query.get(1).title == "Build a doll house"
+    assert new_goal.title == "Build a doll house"
+
     
     # ---- Complete Assertions Here ----
 
@@ -159,11 +163,14 @@ def test_update_goal_not_found(client):
     response_body = response.get_json()
     # ---- Complete Act Here ----
 
+    query = db.select(Goal).where(Goal.id ==1)
+    
+
     # Assert
     # ---- Complete Assertions Here ----
     assert response.status_code == 404
     assert response_body == {"message": "Goal 1 not found"}
-    assert not Goal.query.get(1)
+    assert db.session.scalar(query) == None
 
     # ---- Complete Assertions Here ----
 
