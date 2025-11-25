@@ -33,6 +33,6 @@ class Task(db.Model):
     def from_dict(cls, data):
         new_task = cls(title=data["title"],
                     description=data["description"],
-                    completed_at=datetime.fromisoformat(data["completed_at"]) if "completed_at" in data and data["completed_at"] != False else None
+                    completed_at=datetime.fromisoformat(data["completed_at"]) if "completed_at" in data and data["completed_at"] != None else None
                     )
         return new_task
