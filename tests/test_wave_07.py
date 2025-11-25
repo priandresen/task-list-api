@@ -74,7 +74,10 @@ def test_route_utilities_validate_model_with_goal_invalid_id(client, one_goal):
         result_task = validate_model(Goal, "One")
 
     response = e.value.get_response()
+    response_body = response.get_json()
+
     assert response.status_code == 400
+    assert response_body == {"message": "Goal One invalid"}
     
     #raise Exception("Complete test with assertion status code and response body")
     # *****************************************************************************
@@ -88,7 +91,9 @@ def test_route_utilities_validate_model_with_goal_missing_id(client, one_goal):
         result_task = validate_model(Goal, 4)
 
     response = e.value.get_response()
+    response_body = response.get_json()
     assert response.status_code == 404
+    assert response_body == {"message" : "Goal 4 not found"}
     
     #raise Exception("Complete test with assertion status code and response body")
     # *****************************************************************************
