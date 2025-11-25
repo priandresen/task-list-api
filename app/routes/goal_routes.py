@@ -14,7 +14,7 @@ def create_goal():
     return create_model(Goal, request_body)
 
 @bp.post("/<goal_id>/tasks")
-def create_goal_associated_with_tasks(goal_id):
+def associate_tasks_to_goal(goal_id):
     goal = validate_model(Goal, goal_id)
     request_body = request.get_json()
     
