@@ -27,8 +27,7 @@ def associate_tasks_to_goal(goal_id):
         
     db.session.commit()
 
-    return {"id" : goal.id, 
-            "task_ids": [task.id for task in goal.tasks]}
+    return goal.to_dict_with_task()
 
 
 @bp.get("")
