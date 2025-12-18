@@ -27,7 +27,7 @@ class Goal(db.Model):
             "task_ids" : [task.id for task in self.tasks]
         }
 
-        return goal_dict_with_task;
+        return goal_dict_with_task
 
     @classmethod
     def from_dict(cls, data):
